@@ -36,6 +36,8 @@ button.secondary{background:white;color:#006052}button:disabled{opacity:.55;curs
 .cap-teclat{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 #ansa-teclat{flex:1;margin:0;padding:6px;cursor:grab;touch-action:none;user-select:none;font-weight:700}
 #ansa-teclat:active{cursor:grabbing}
+.indicacions-teclat{font-size:.87rem;line-height:1.35;margin:0 0 10px;padding:8px;background:#fff;border-radius:8px}
+.indicacions-teclat p:last-child{margin:0}
 .cos-teclat{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
 .tecles,.cruceta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
 .teclat button{padding:3px;min-height:46px;font-size:1.2rem}
@@ -62,7 +64,7 @@ dialog{width:min(92vw,460px);margin:auto}dialog::backdrop{background:#142e28aa}
 <label>Correu del centre<input name="correu" type="email" maxlength="254" required autocomplete="email"></label>
 <label>Codi del paper<select name="versio" required><option value="">Tria el codi</option></select></label>
 </div>
-<p>Separa les solucions amb comes o punt i coma, com ara <strong>−2, 3</strong>. Escriu els resultats fraccionaris com a <strong>fraccions simplificades</strong>, amb <strong>/</strong>. Si escrius un decimal amb el teclat físic, fes servir el punt.</p>
+
 <p class="muted">Toca una casella per seleccionar-la. Arrossega la capçalera del teclat per moure’l. També pots navegar amb les fletxes o Intro.</p>
 </section>
 <section class="zona-resultats">
@@ -71,6 +73,10 @@ dialog{width:min(92vw,460px);margin:auto}dialog::backdrop{background:#142e28aa}
 <div class="cap-teclat">
 <p id="ansa-teclat">⠿ <span id="apartat-actiu">Apartat 1a</span></p>
 <button type="button" class="secondary" id="amaga-teclat">Amaga</button>
+</div>
+<div class="indicacions-teclat">
+<p>Recorda simplificar primer els resultats i no escriure decimals, posa la fracció.</p>
+<p>Si hi ha més d’una solució, separa-les per comes ( , ) o punt i coma ( ; ).</p>
 </div>
 <div class="cos-teclat">
 <div class="tecles" id="tecles-numeriques"></div>
@@ -173,6 +179,17 @@ function actualitza() {
   const n = caselles.filter(casella => casella.value.trim()).length;
   comptador.textContent = n+' de 21 apartats omplerts';
 }
+function insereixTecla(camp, tecla) {
+  const inici = camp.selectionStart;
+  const fi = camp.selectionEnd;
+  const separador = tecla === ',' || tecla === ';';
+  const espaiExistent = separador && camp.value.charAt(fi) === ' ';
+  const fragment = separador && !espaiExistent ? tecla + ' ' : tecla;
+  if (camp.value.length - (fi - inici) + fragment.length > camp.maxLength) return;
+  camp.setRangeText(fragment, inici, fi, 'end');
+  if (espaiExistent) camp.setSelectionRange(inici + 2, inici + 2);
+}
+
 function selecciona(index) {
   caselles[activa].classList.remove('activa');
   activa = index;
@@ -191,6 +208,17 @@ caselles.forEach((text,i) => {
   text.addEventListener('focus',()=>selecciona(i));
   text.addEventListener('keydown',e=>{
     if (e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === ',' || e.key === ';') {
+      e.preventDefault();
+      insereixTecla(text, e.key);
+      actualitza();
+      return;
+    }
+    if (e.key === ' ' && text.selectionStart === text.selectionEnd &&
+        /[,;] $/.test(text.value.slice(0, text.selectionStart))) {
+      e.preventDefault();
+      return;
+    }
     const seleccio = text.selectionStart!==text.selectionEnd;
     let desti = i;
     if (e.key==='ArrowUp') desti = i-3;
@@ -242,8 +270,8 @@ tecles.addEventListener('click',e=>{
     const fi = camp.selectionEnd;
     if (tecla==='esborra') {
       camp.setRangeText('', inici===fi ? Math.max(0,inici-1) : inici, fi, 'end');
-    } else if (camp.value.length-(fi-inici)<camp.maxLength) {
-      camp.setRangeText(tecla,inici,fi,'end');
+    } else {
+      insereixTecla(camp, tecla);
     }
   }
   camp.focus({preventScroll:true});
