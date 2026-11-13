@@ -3,328 +3,153 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Temps d'examen</title>
+<title>Prova d’equacions de 4t d’ESO</title>
 <style>
-:root{--accent:#2563eb;--phase:#2563eb;--phase-pale:#eff6ff;--bg:#f4f7fb;--ink:#172033}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;font-family:Arial,Helvetica,sans-serif;background:#101827;color:var(--ink);overflow:hidden}
-body{display:flex;align-items:stretch;justify-content:stretch}
-main{width:100vw;height:100vh;display:grid;grid-template-columns:minmax(330px,42%) 1fr;gap:1.2vw;padding:1.2vw;background:var(--bg)}
-.timer-panel,.message-panel{border-radius:22px;background:#fff;box-shadow:0 8px 32px #10204016;min-width:0;min-height:0}
-.timer-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2vh 2vw;gap:1.5vh}
-.kicker{color:var(--accent);font-size:clamp(13px,1.2vw,20px);font-weight:700;letter-spacing:.14em;color:#64748b;text-transform:uppercase}
-.clock{width:min(36vw,65vh,520px);height:min(36vw,65vh,520px);max-width:100%;overflow:visible}
-.clock-face{fill:#fff;stroke:var(--accent);stroke-width:7}
-.tick{stroke:var(--accent);stroke-width:3;stroke-linecap:round}
-.hand{stroke:var(--accent);stroke-width:5;stroke-linecap:round}
-.digital{font-size:clamp(38px,5.2vw,84px);font-weight:800;letter-spacing:.025em;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1}
- .remaining-label{font-size:clamp(14px,1.25vw,20px);font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.1em}
-.remaining{font-size:clamp(46px,6vw,104px);font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:-.035em;line-height:1.04;white-space:nowrap}
-.phase-chip{border-radius:100px;padding:10px 20px;background:var(--phase-pale);color:var(--phase);font-size:clamp(15px,1.4vw,23px);font-weight:850;text-align:center}
-.phase-nav{display:flex;align-items:center;gap:12px;margin-bottom:18px;justify-content:space-between}
-.phase-nav button{border-radius:100px;width:50px;height:50px;background:var(--phase-pale);color:var(--phase);font-size:25px;flex-shrink:0}
-.phase-nav button:disabled{opacity:.25;cursor:not-allowed}
-.phase-nav .phase-chip{flex:1}
-.message-panel{border-top:8px solid var(--phase);transition:border-color .35s}
-#message{display:block !important;overflow:auto !important;white-space:normal !important;text-align:left !important;line-height:1.32 !important}
-#message .message-content{width:100%;margin:auto 0}
-#message p{margin:0 0 .55em}
-#message h1,#message h2,#message h3{font-size:1.22em;line-height:1.17;margin:0 0 .6em;color:var(--phase)}
-#message h2{font-size:1.12em} #message h3{font-size:1.05em}
-#message strong,#message b{font-weight:900 !important;color:#111827}
-#message ul{padding-left:1.4em;margin:.4em 0 .6em}
-#message .empty{color:#64748b;font-style:italic}
-#message.too-long{box-shadow:inset 0 -12px 12px -15px #b45309}
-.fit-warning{font-size:12px;color:#b45309;min-height:1em;text-align:right}
-.message-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;min-height:45px}
-.font-controls{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-shrink:0}
-.font-controls button{width:44px;height:42px;padding:0;border-radius:12px;background:var(--phase-pale);color:var(--phase);font-size:19px;font-weight:900;line-height:1;transition:background .2s,transform .15s}
-.font-controls button:hover{filter:brightness(.95)}
-.font-controls button:active{transform:scale(.95)}
-.font-controls button:disabled{opacity:.3;cursor:not-allowed}
-.font-controls button:focus-visible{outline:3px solid var(--phase);outline-offset:2px}
-
-.status{font-size:clamp(13px,1.15vw,18px);font-weight:700;color:#64748b;min-height:1.3em;text-align:center}
-.message-panel{padding:clamp(24px,3vw,56px);display:flex;flex-direction:column;overflow:hidden}
-.message-heading{color:var(--accent);font-size:clamp(16px,1.3vw,22px);font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:2vh}
-#message{white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;text-align:justify;text-align-last:left;line-height:1.22;font-size:clamp(20px,3vw,58px);overflow:hidden}
-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:1.5vh;color:#94a3b8;font-size:clamp(10px,.8vw,13px)}
-button{border:0;border-radius:9px;padding:9px 13px;background:#e8eef8;color:#1e3a5f;font-weight:700;cursor:pointer}
-button.active{background:#dbeafe;outline:2px solid var(--accent)}
-#toolbar{position:fixed;left:14px;bottom:14px;z-index:5;display:flex;gap:6px;opacity:.15;transition:opacity .2s}
-#toolbar:hover,#toolbar:focus-within{opacity:1}
-#settings{display:none;position:fixed;inset:0;z-index:10;background:#07111dcc;align-items:center;justify-content:center;padding:20px}
-#settings.open{display:flex}
-.dialog{background:#fff;color:#172033;border-radius:16px;padding:24px;width:min(680px,96vw);max-height:90vh;overflow:auto}
-.dialog h2{margin-top:0}
-.dialog label{display:block;font-weight:700;margin:14px 0 6px}
-.dialog input,.dialog textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
-.dialog textarea{min-height:110px}
-.help{font-size:14px;color:#475569;line-height:1.45}
-.dialog-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-.primary{background:#1d4ed8;color:white}
-@media(max-width:1100px){.remaining{font-size:clamp(36px,5.2vw,75px)}.phase-nav button{width:40px;height:40px}.phase-chip{padding:8px}}
-@media(max-aspect-ratio:1/1){main{grid-template-columns:1fr;grid-template-rows:45% 1fr;gap:1vh;padding:1vh}.timer-panel{flex-direction:row;flex-wrap:wrap}.clock{height:25vh;width:25vh}.message-panel{padding:3vw}#message{font-size:clamp(18px,4vw,36px)}}
+:root{font:16px/1.5 system-ui,sans-serif;color:#173a35;background:#eef5f2}
+*{box-sizing:border-box}body{margin:0}main{max-width:960px;margin:auto;padding:26px 18px}
+h1{font-size:clamp(2rem,5vw,3.1rem);line-height:1.12;margin:0 0 10px}h2{font-size:1rem;margin:0 0 10px}
+p{margin:0 0 12px}section,fieldset,dialog{background:white;border:1px solid #bfd6cc;border-radius:14px;padding:16px;margin:0}
+form{display:grid;gap:12px}label{font-weight:650}input,select,button{font:inherit}
+input,select{display:block;width:100%;border:1px solid #74978a;border-radius:7px;padding:8px;margin-top:4px;background:white;color:inherit}
+button{border:1px solid #006052;border-radius:7px;padding:9px 15px;background:#006052;color:white;cursor:pointer;font-weight:700}
+button.secondary{background:white;color:#006052}button:disabled{opacity:.55;cursor:default}
+.identitat{display:grid;gap:8px}
+.graella{width:100%;border-collapse:separate;border-spacing:0 4px;table-layout:fixed}
+.graella th,.graella td{padding:3px 4px}.graella th:first-child{width:64px}
+.graella td{background:#edf5f2;border-radius:8px}.graella input,.graella select{margin:0;padding:4px 5px}
+.graella select{font-size:.81rem}.graella input{margin-top:3px}
+.graella td:focus-within{outline:2px solid #168b76;outline-offset:-2px}
+.graella [hidden]{display:none}
+@media(max-width:500px){.graella th:first-child{width:30px}.graella th,.graella td{padding:2px}.graella select{font-size:.75rem}}
+.identitat{grid-template-columns:minmax(0,2fr) minmax(110px,1fr);margin-bottom:10px}
+.actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}.muted{color:#456760}.error{color:#8b2929}
+dialog{width:min(92vw,460px);margin:auto}dialog::backdrop{background:#142e28aa}
+:focus-visible{outline:3px solid #1a8a74;outline-offset:2px}
 </style>
 </head>
 <body>
 <main>
-<section class="timer-panel">
-  <div class="kicker">Temps d'examen</div>
-  <svg class="clock" viewBox="0 0 240 240" aria-label="Rellotge analògic">
-    <circle class="clock-face" cx="120" cy="120" r="109"/>
-    <g id="ticks"></g>
-    <g id="numbers" fill="var(--accent)" font-size="16" font-weight="700" text-anchor="middle" dominant-baseline="middle"></g>
-    <line id="hourHand" class="hand" x1="120" y1="120" x2="120" y2="68"/>
-    <line id="minuteHand" class="hand" x1="120" y1="120" x2="120" y2="37" style="stroke-width:3.5"/>
-    <circle cx="120" cy="120" r="5.5" fill="var(--accent)"/>
-  </svg>
-  <div class="digital" id="digital">--:--:--</div>
-  <div class="remaining-label">Temps restant</div>
-  <div class="remaining" id="remaining">--:--</div>
-  <div class="status" id="status">Selecciona o espera un horari</div>
+<h1>Prova d’equacions</h1>
+<p class="muted">4t d’ESO · Lliurament de respostes</p>
+<form id="prova" method="post" target="_blank">
+<section>
+<div class="identitat">
+<label>Correu del centre<input name="correu" type="email" maxlength="254" required autocomplete="email"></label>
+<label>Codi del paper<select name="versio" required><option value="">Tria el codi</option></select></label>
+</div>
+<p>Separa les solucions amb comes o punt i coma, com ara <strong>−2, 3</strong>. Escriu les fraccions amb <strong>/</strong> i els decimals amb punt.</p>
+<p class="muted">A 1a, 2a i 3a, simplifica les fraccions. Usa les fletxes o Retorn per moure’t per la graella.</p>
 </section>
-<section class="message-panel">
-  <div class="message-heading">Informació i instruccions</div>
-  <div class="phase-nav">
-    <button id="prevPhase" title="Missatge anterior" aria-label="Missatge anterior">‹</button>
-    <div class="phase-chip" id="phaseChip">1 · Lectura inicial</div>
-    <button id="nextPhase" title="Missatge següent" aria-label="Missatge següent">›</button>
-  </div>
-  <div id="message"><div class="message-content"><p>Connectant amb Google Sheets…</p></div></div>
-  <div class="message-bottom">
-    <div class="fit-warning" id="fitWarning" aria-live="polite"></div>
-    <div class="font-controls" aria-label="Mida de la lletra de les instruccions">
-      <button id="fontSmaller" type="button" title="Reduir la lletra" aria-label="Reduir la lletra">A−</button>
-      <button id="fontBigger" type="button" title="Augmentar la lletra" aria-label="Augmentar la lletra">A+</button>
-    </div>
-  </div>
-  <footer><span id="sync">Connectant amb Google Sheets…</span><span id="slotLabel">Horari automàtic</span></footer>
-</section>
+<section><table class="graella" aria-label="Resultats dels exercicis">
+<thead><tr><th scope="col">Ex.</th><th scope="col">a</th><th scope="col">b</th><th scope="col">c</th></tr></thead>
+<tbody id="grups"></tbody>
+</table></section>
+<div class="actions"><button id="revisa">Revisa el lliurament</button><span id="comptador">0 de 21 apartats omplerts</span><span id="avis" role="status"></span></div>
+</form>
+<dialog id="confirmacio">
+<h2>Confirma el lliurament</h2>
+<p id="resum"></p>
+<p class="muted">La confirmació i la nota s’obriran en una pestanya nova.</p>
+<div class="actions">
+<button type="submit" form="prova" id="enviar">Envia les respostes</button>
+<button type="button" class="secondary" id="cancel">Torna a les respostes</button>
+</div>
+</dialog>
 </main>
-<div id="toolbar">
-  <select id="slotSelect" aria-label="Selecciona horari" style="border:0;border-radius:9px;padding:9px 10px;background:#e8eef8;color:#1e3a5f;font-weight:700">
-   <option value="auto">Horari automàtic</option>
-   <option value="0">08:00 – 09:00</option><option value="1">09:00 – 10:00</option>
-   <option value="2">10:00 – 11:00</option><option value="3">11:30 – 12:30</option>
-   <option value="4">12:30 – 13:30</option><option value="5">13:30 – 14:30</option>
-  </select>
-  <button id="settingsBtn" title="Configuració">⚙ Configuració</button>
-  <button id="fullBtn" title="Pantalla completa">⛶ Pantalla completa</button>
-</div>
-<div id="settings">
- <div class="dialog">
-  <h2>Configuració</h2>
-  <p class="help">El web llegeix automàticament els missatges de B1, C1 i D1 del full de Google Sheets publicat en CSV. Canvia el text al full per actualitzar la projecció.</p>
-  <label for="sheetUrl">URL CSV de Google Sheets</label>
-  <input id="sheetUrl" readonly>
-  <label for="localMessage">Missatge alternatiu del bloc actual (només fins a la propera sincronització)</label>
-  <textarea id="localMessage"></textarea>
-  <div class="help">
-   <b>Fila 1:</b> B1 = missatge inicial (0–5 minuts); C1 = missatge principal (5–50 minuts); D1 = missatge final (a partir del minut 50). A1 pot contenir un títol.
-   <br><br><b>Format:</b> <code>**negreta**</code> i <code># Títol</code> al principi de línia; també <code>## Subtítol</code>, <code>*cursiva*</code> i llistes amb <code>- </code>. Usa Alt+Retorn dins una cel·la per fer salts de línia.
-   <br><br><b>Horari opcional:</b> A2 = <code>horari</code> i B2 = <code>auto</code>, o una franja com <code>08:00-09:00</code>. Amb <code>auto</code> s'utilitza l'horari habitual. El canvi automàtic es produeix als minuts 5 i 50 des de l'inici de la franja seleccionada.
-   <br><br>Per publicar: Google Sheets → Fitxer → Comparteix → Publica al web → selecciona el full → CSV. El full publicat pot ser accessible per altres persones: no hi posis dades sensibles. La publicació pot tenir retard en propagar els canvis.
-  </div>
-  <div class="dialog-actions"><button id="closeSettings">Tancar</button><button class="primary" id="saveSettings">Desar</button></div>
- </div>
-</div>
 <script>
-const slots=[["08:00","09:00"],["09:00","10:00"],["10:00","11:00"],["11:30","12:30"],["12:30","13:30"],["13:30","14:30"]];
-const $=id=>document.getElementById(id);
-const DEFAULT_SHEET_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSfYiyxkncgw25IXXoJhF95e_3ew4eisumWmIAVdlSUudwD64JE4FclduCoK77xpngZcNYVAmUmL5-X/pub?output=csv";
-let selectedSlot=null, sheetTimer=null, localSlotOverride=false;
-const phaseInfo=[
- {label:"1 · Lectura inicial",color:"#1d4ed8",pale:"#dbeafe",fallback:"# Llegeix atentament l’examen\n\n**Primers cinc minuts:** llegeix els enunciats abans de començar."},
- {label:"2 · Durant l’examen",color:"#15803d",pale:"#dcfce7",fallback:"# Instruccions generals\n\n**Treballa en silenci.**\n\nEscriu els càlculs i revisa les respostes."},
- {label:"3 · Tram final",color:"#c2410c",pale:"#ffedd5",fallback:"# Últims minuts\n\n**Revisa les respostes.**\n\nComprova que no t’has deixat cap apartat."}
-];
-let sheetMessages=phaseInfo.map(p=>p.fallback), shownPhase=-1, manualPhase=null, lastAutoPhase=-1, currentMessage="";
+const ADRECA_APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbx9BowWy_k-5lPSQEjGVAjUESeSm0kZnwhmMqTGiC19eUof3PnX2226dCLJYf4glGMN/exec';
+const form = document.querySelector('#prova');
+const dialog = document.querySelector('#confirmacio');
+const avis = document.querySelector('#avis');
+const versio = form.elements.versio;
+for (let i=1; i<=24; i++) versio.add(new Option('V'+String(i).padStart(2,'0')));
+const files = document.querySelector('#grups');
+files.innerHTML = Array.from({length:7}, (_, fila) => {
+  const numero = fila + 1;
+  return '<tr><th scope="row">'+numero+'</th>'+['a','b','c'].map(l => {
+    const apartat = numero+l;
+    return '<td tabindex="-1"><select aria-label="Tipus de resposta '+apartat+'">'+
+      '<option value="">Escriure</option><option>Sense solució</option><option>Identitat</option></select>'+
+      '<input class="resultat" aria-label="Resultat '+apartat+'" type="text" maxlength="140" autocomplete="off" spellcheck="false">'+
+      '<input type="hidden" name="r'+apartat+'"></td>';
+  }).join('')+'</tr>';
+}).join('');
 
-function buildClock(){
- const ticks=$("ticks"), nums=$("numbers");
- for(let i=0;i<60;i++){
-  const a=i*Math.PI/30, major=i%5===0;
-  const r1=major?94:99, r2=major?105:104;
-  const x1=120+Math.sin(a)*r1,y1=120-Math.cos(a)*r1;
-  const x2=120+Math.sin(a)*r2,y2=120-Math.cos(a)*r2;
-  const line=document.createElementNS("http://www.w3.org/2000/svg","line");
-  line.setAttribute("x1",x1);line.setAttribute("y1",y1);line.setAttribute("x2",x2);line.setAttribute("y2",y2);
-  line.setAttribute("class","tick");line.setAttribute("opacity",major?"1":".35");line.setAttribute("stroke-width",major?"2.5":"1.3");ticks.appendChild(line);
- }
- for(let n=1;n<=12;n++){
-  const a=n*Math.PI/6,x=120+Math.sin(a)*77,y=120-Math.cos(a)*77;
-  const t=document.createElementNS("http://www.w3.org/2000/svg","text");
-  t.setAttribute("x",x);t.setAttribute("y",y);t.textContent=n;nums.appendChild(t);
- }
+const caselles = [...files.querySelectorAll('td')];
+const comptador = document.querySelector('#comptador');
+function actualitza(casella) {
+  const mode = casella.querySelector('select');
+  const text = casella.querySelector('.resultat');
+  text.hidden = Boolean(mode.value);
+  casella.querySelector('input[type="hidden"]').value = mode.value || text.value.trim();
+  const n = caselles.filter(c => c.querySelector('input[type="hidden"]').value).length;
+  comptador.textContent = n+' de 21 apartats omplerts';
 }
-function parseTime(s){const [h,m]=s.split(":").map(Number);return h*60+m}
-function activeSlot(now){
- const mins=now.getHours()*60+now.getMinutes();
- return slots.findIndex(([a,b])=>mins>=parseTime(a)&&mins<parseTime(b));
+function enfoca(index) {
+  const casella = caselles[index];
+  if (!casella) return;
+  const text = casella.querySelector('.resultat');
+  (text.hidden ? casella : text).focus();
 }
-// Transició contínua en funció dels minuts transcorreguts des de l'inici de l'examen.
-// Blau fosc a l'inici, verd des del minut 10, i vermell intens als últims 3 minuts.
-const colorStops=[
- [0,"#1e3a8a"],   // Blau fosc
- [10,"#15803d"],  // Verd
- [40,"#15803d"],  // Es manté verd la major part de la sessió
- [48,"#eab308"],  // Groc
- [54,"#f97316"],  // Taronja
- [57,"#dc2626"],  // Vermell fort (últims 3 minuts)
- [60,"#dc2626"]
-];
-function mixHex(a,b,t){
- const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
- const aa=rgb(a),bb=rgb(b);
- return '#'+aa.map((v,i)=>Math.round(v+(bb[i]-v)*t).toString(16).padStart(2,'0')).join('');
+caselles.forEach((casella,i) => {
+  const mode = casella.querySelector('select');
+  const text = casella.querySelector('.resultat');
+  text.addEventListener('input',()=>actualitza(casella));
+  mode.addEventListener('change',()=>{
+    actualitza(casella);
+    enfoca(i);
+  });
+  casella.addEventListener('keydown',e=>{
+    if (e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target===mode) return; // Les fletxes del desplegable trien una opció.
+    const editant = e.target===text;
+    const seleccio = editant && text.selectionStart!==text.selectionEnd;
+    let desti = i;
+    if (e.key==='ArrowUp') desti = i-3;
+    else if (e.key==='ArrowDown') desti = i+3;
+    else if (e.key==='ArrowLeft' && (!editant || (!seleccio && text.selectionStart===0))) {
+      if (i%3!==0) desti=i-1;
+    } else if (e.key==='ArrowRight' && (!editant || (!seleccio && text.selectionEnd===text.value.length))) {
+      if (i%3!==2) desti=i+1;
+    } else if (e.key==='Enter') {
+      e.preventDefault();
+      if (i===caselles.length-1 && !e.shiftKey) document.querySelector('#revisa').focus();
+      else enfoca(i+(e.shiftKey?-1:1));
+      return;
+    }
+    if (desti!==i && caselles[desti]) {
+      e.preventDefault();
+      enfoca(desti);
+    }
+  });
+});
+document.querySelector('#cancel').onclick = () => dialog.close();
+if (/^https:\/\/script\.google\.com\/(?:macros|a\/macros\/[^/]+)\/s\/[^/]+\/exec$/.test(ADRECA_APPS_SCRIPT)) {
+  form.action = ADRECA_APPS_SCRIPT;
+} else {
+  document.querySelector('#revisa').disabled = true;
+  avis.textContent = 'El docent encara ha de connectar el formulari.';
 }
-function examColor(elapsed){
- const t=Math.max(0,Math.min(60,elapsed));
- for(let i=1;i<colorStops.length;i++){
-  const [end,cb]=colorStops[i];
-  if(t<=end){const [start,ca]=colorStops[i-1];return mixHex(ca,cb,(t-start)/(end-start));}
- }
- return colorStops[colorStops.length-1][1];
-}
-function setAccent(color){
- const root=document.documentElement;
- root.style.setProperty("--accent",color);
- root.style.setProperty("--phase",color);
- root.style.setProperty("--phase-pale",mixHex(color,"#ffffff",.89));
-}
-function escapeHTML(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c])}
-function inlineMarkdown(t){
- return escapeHTML(t).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>");
-}
-function markdown(text){
- const lines=String(text||"").replace(/\r\n?/g,"\n").split("\n");
- let html="",inList=false;
- for(const raw of lines){
-  const line=raw.trim();
-  if(/^[-•]\s+/.test(line)){
-    if(!inList){html+="<ul>";inList=true}
-    html+="<li>"+inlineMarkdown(line.replace(/^[-•]\s+/,""))+"</li>";continue;
+form.addEventListener('submit',e => {
+  caselles.forEach(actualitza);
+  if (!form.hasAttribute('action')) {e.preventDefault();return;}
+  if (e.submitter && e.submitter.id==='enviar' && dialog.open) {
+    dialog.close();
+    avis.className = '';
+    avis.textContent = 'Consulta la pestanya nova per confirmar que s’ha registrat el lliurament.';
+    return;
   }
-  if(inList){html+="</ul>";inList=false}
-  if(!line){html+='<div style="height:.34em"></div>';continue}
-  const heading=line.match(/^(#{1,3})\s+(.+)$/);
-  if(heading){const level=heading[1].length;html+=`<h${level}>${inlineMarkdown(heading[2])}</h${level}>`}
-  else html+="<p>"+inlineMarkdown(line)+"</p>";
- }
- if(inList)html+="</ul>";
- return html||'<p class="empty">No hi ha cap missatge en aquesta casella.</p>';
-}
-let fontScale=1;
-function changeFontScale(delta){
- fontScale=Math.round(Math.min(1.8,Math.max(.6,fontScale+delta))*10)/10;
- fitMessage();
-}
-function fitMessage(){
- const el=$("message"), content=el.querySelector(".message-content");if(!content)return;
- const max=Math.min(window.innerWidth*.037,window.innerHeight*.075,66),min=23;
- let lo=min,hi=Math.max(min,max),size=min;
- const fits=sz=>{el.style.fontSize=sz+"px";return content.scrollHeight<=el.clientHeight-5&&content.scrollWidth<=el.clientWidth-3};
- if(fits(hi))size=hi;
- else {for(let k=0;k<14;k++){const mid=(lo+hi)/2;if(fits(mid)){size=mid;lo=mid}else hi=mid}}
- // Partim de l'ajust automàtic, però respectem la mida triada manualment.
- const chosenSize=Math.round(size*fontScale*10)/10;
- el.style.fontSize=chosenSize+"px";
- const over=content.scrollHeight>el.clientHeight+2||content.scrollWidth>el.clientWidth+2;
- $("fontSmaller").disabled=fontScale<=.6;
- $("fontBigger").disabled=fontScale>=1.8;
- el.classList.toggle("too-long",over);
- $("fitWarning").textContent=over?"Missatge llarg: es pot desplaçar cap avall":"";
-}
-function showPhase(phase){
- phase=Math.min(2,Math.max(0,phase));
- if(shownPhase===phase&&currentMessage===sheetMessages[phase])return;
- shownPhase=phase;currentMessage=sheetMessages[phase];
- $("phaseChip").textContent=phaseInfo[phase].label;
- $("prevPhase").disabled=phase===0;$("nextPhase").disabled=phase===2;
- $("message").innerHTML='<div class="message-content">'+markdown(currentMessage)+'</div>';
- fitMessage();
-}
-function advancePhase(delta){manualPhase=Math.max(0,Math.min(2,shownPhase+delta));showPhase(manualPhase)}
-function refreshAutomaticPhase(elapsed){
- if(elapsed===null)return;
- const autoPhase=elapsed<5?0:elapsed<50?1:2;
- // A cada canvi automàtic de tram, recuperem el control automàtic.
- if(lastAutoPhase!==autoPhase){manualPhase=null;lastAutoPhase=autoPhase}
- showPhase(manualPhase===null?autoPhase:manualPhase);
-}
-function render(){
- const now=new Date(), hh=now.getHours(), mm=now.getMinutes(), ss=now.getSeconds();
- $("digital").textContent=[hh,mm,ss].map(n=>String(n).padStart(2,"0")).join(":");
- const minute=hh*60+mm+ss/60, hourAngle=((hh%12)+mm/60+ss/3600)*30, minuteAngle=(mm+ss/60)*6;
- $("hourHand").setAttribute("transform",`rotate(${hourAngle} 120 120)`);
- $("minuteHand").setAttribute("transform",`rotate(${minuteAngle} 120 120)`);
- let idx=selectedSlot===null?activeSlot(now):selectedSlot;
- if(idx<0){$("remaining").textContent="--:--";$("status").textContent="Fora de l'horari d'examen";$("slotLabel").textContent="Sense examen actiu";setAccent("#1e3a8a");return}
- const [start,end]=slots[idx], startMin=parseTime(start),endMin=parseTime(end),remainingSeconds=Math.max(0,Math.ceil((endMin-minute)*60));
- const mins=Math.floor(remainingSeconds/60),sec=remainingSeconds%60;
- $("remaining").textContent=`${String(mins).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
- $("slotLabel").textContent=`Horari: ${start} – ${end}`;
- const elapsed=Math.max(0,minute-startMin);
- // El color segueix el temps real, independentment del missatge seleccionat manualment.
- setAccent(examColor(elapsed));
- if(remainingSeconds<=180){$("status").textContent="Últims tres minuts"}
- else if(remainingSeconds<=300){$("status").textContent="Últims cinc minuts"}
- else if(remainingSeconds<=600){$("status").textContent="Queden deu minuts"}
- else if(remainingSeconds<=900){$("status").textContent="Queden quinze minuts"}
- else if(remainingSeconds<=1800){$("status").textContent="Queden trenta minuts"}
- else{$("status").textContent="Temps d'examen"}
- refreshAutomaticPhase(elapsed);
-}
-function parseCSV(text){
- const rows=[];let row=[],cell="",quoted=false;
- for(let i=0;i<text.length;i++){const c=text[i];
-  if(c==='"'&&quoted&&text[i+1]==='"'){cell+='"';i++}
-  else if(c==='"')quoted=!quoted;
-  else if(c===','&&!quoted){row.push(cell);cell=""}
-  else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cell);rows.push(row);row=[];cell=""}
-  else cell+=c;
- }
- if(cell.length||row.length){row.push(cell);rows.push(row)}
- return rows;
-}
-async function fetchSheet(){
- try{
-  const res=await fetch(DEFAULT_SHEET_URL,{cache:"no-store"});if(!res.ok)throw Error("HTTP "+res.status);
-  const rows=parseCSV(await res.text());
-  if(rows.length){
-    const first=rows[0];
-    // B1, C1, D1: les columnes del primer registre CSV.
-    const next=[1,2,3].map((col,i)=>first[col]!==undefined?first[col]:sheetMessages[i]);
-    sheetMessages=next;
+  e.preventDefault();
+  const dades = new FormData(form);
+  const respostes = [...dades.entries()].filter(([nom,valor]) => /^r[1-7][abc]$/.test(nom) && valor.trim()).length;
+  if (!respostes) {
+    avis.className = 'error';
+    avis.textContent = 'Escriu almenys un resultat abans de lliurar.';
+    return;
   }
-  const values={};rows.slice(1).forEach(r=>{if(r.length>=2)values[(r[0]||"").trim().toLowerCase()]=(r[1]||"").trim()});
-  if(values.horari&&!localSlotOverride){
-    const v=values.horari.toLowerCase().replace(/\s/g,"");
-    if(v==="auto")selectedSlot=null;
-    else {const i=slots.findIndex(([a,b])=>(a+"-"+b).toLowerCase()===v);if(i>=0)selectedSlot=i}
-  }
-  showPhase(shownPhase<0?0:shownPhase);
-  $("sync").textContent="Google Sheets · actualitzat "+new Date().toLocaleTimeString("ca-ES");
- }catch(e){$("sync").textContent="Sense connexió · es manté l’últim missatge"}
-}
-$("slotSelect").onchange=e=>{localSlotOverride=e.target.value!=="auto";selectedSlot=localSlotOverride?Number(e.target.value):null;lastAutoPhase=-1;render()};
-$("prevPhase").onclick=()=>advancePhase(-1);
-$("nextPhase").onclick=()=>advancePhase(1);
-$("fontSmaller").onclick=()=>changeFontScale(-.1);
-$("fontBigger").onclick=()=>changeFontScale(.1);
-$("settingsBtn").onclick=()=>{$("sheetUrl").value=DEFAULT_SHEET_URL;$("localMessage").value=currentMessage||$("message").textContent;$("settings").classList.add("open")};
-$("closeSettings").onclick=()=>$("settings").classList.remove("open");
-$("saveSettings").onclick=()=>{
- const url=DEFAULT_SHEET_URL, msg=$("localMessage").value;
- sheetMessages[shownPhase<0?0:shownPhase]=msg;showPhase(shownPhase<0?0:shownPhase);
- $("settings").classList.remove("open");fetchSheet();
- if(sheetTimer)clearInterval(sheetTimer);sheetTimer=setInterval(fetchSheet,10000);
-};
-$("fullBtn").onclick=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()};
-window.addEventListener("resize",fitMessage);
-buildClock();showPhase(0);render();setInterval(render,1000);fitMessage();
-sheetTimer=setInterval(fetchSheet,10000);fetchSheet();
+  document.querySelector('#resum').textContent = dades.get('correu')+' · '+dades.get('versio')+' · '+respostes+' de 21 apartats amb resposta';
+  dialog.showModal();
+});
 </script>
 </body>
 </html>
