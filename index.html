@@ -17,12 +17,35 @@ button.secondary{background:white;color:#006052}button:disabled{opacity:.55;curs
 .graella{width:100%;border-collapse:separate;border-spacing:0 4px;table-layout:fixed}
 .graella th,.graella td{border-radius:8px}.graella input{margin:0;padding:8px 5px}
 .graella input.activa{background:#d8f1e8;border-color:#006052}
-.teclat{background:#eff8f4;border:1px solid #bfd6cc;border-radius:10px;padding:8px;margin-bottom:10px}
-.graella-scroll{max-height:min(55vh,440px);overflow:auto;scroll-padding:6px}
-.teclat p{margin:0 0 5px;font-weight:700}.tecles{display:flex;flex-wrap:wrap;gap:5px}
-.tecles button{padding:4px 8px;min-height:34px;min-width:32px}
-.tecles + .tecles{margin-top:5px}
-@media(max-width:500px){.graella th:first-child{width:30px}.graella th,.graella td{padding:2px}.tecles button{padding:4px 6px}}
+.zona-resultats{max-width:670px}
+@media(min-width:1024px){main{max-width:1280px}.zona-resultats{width:calc(100% - 395px)}}
+.graella{border-spacing:0 8px}
+.graella tbody tr:nth-child(1){--fila:#e5f3ee}
+.graella tbody tr:nth-child(2){--fila:#e9f0fc}
+.graella tbody tr:nth-child(3){--fila:#f8efdb}
+.graella tbody tr:nth-child(4){--fila:#f3e9f8}
+.graella tbody tr:nth-child(5){--fila:#fbeae4}
+.graella tbody tr:nth-child(6){--fila:#e6f3f6}
+.graella tbody tr:nth-child(7){--fila:#eef2df}
+.graella tbody :is(th,td){background:var(--fila);padding:7px 5px}
+.graella tbody th{border-radius:9px 0 0 9px}
+.graella tbody td{border-radius:0}
+.graella tbody td:last-child{border-radius:0 9px 9px 0}
+.teclat{position:fixed;z-index:2;right:12px;bottom:12px;width:min(380px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;background:#eff8f4;border:1px solid #74978a;border-radius:14px;padding:10px;box-shadow:0 8px 28px #173a3533}
+.teclat[hidden]{display:none}
+.cap-teclat{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+#ansa-teclat{flex:1;margin:0;padding:6px;cursor:grab;touch-action:none;user-select:none;font-weight:700}
+#ansa-teclat:active{cursor:grabbing}
+.cos-teclat{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.tecles,.cruceta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.teclat button{padding:3px;min-height:46px;font-size:1.2rem}
+.tecles button[data-tecla="esborra"]{background:#9b3c31;border-color:#9b3c31;font-size:1.55rem}
+.cruceta [data-mou="amunt"]{grid-column:2}.cruceta [data-mou="esquerra"]{grid-column:1;grid-row:2}
+.cruceta [data-mou="dreta"]{grid-column:3;grid-row:2}.cruceta [data-mou="avall"]{grid-column:2;grid-row:3}
+.respostes-especials{display:grid;gap:5px;margin-top:5px}
+.respostes-especials button{font-size:.95rem}
+#amaga-teclat{min-height:36px;font-size:.86rem;padding:3px 8px}
+@media(max-width:500px){.graella th:first-child{width:30px}.graella th,.graella td{padding:5px 3px}}
 .identitat{grid-template-columns:minmax(0,2fr) minmax(110px,1fr);margin-bottom:10px}
 .actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}.muted{color:#456760}.error{color:#8b2929}
 dialog{width:min(92vw,460px);margin:auto}dialog::backdrop{background:#142e28aa}
@@ -39,20 +62,30 @@ dialog{width:min(92vw,460px);margin:auto}dialog::backdrop{background:#142e28aa}
 <label>Correu del centre<input name="correu" type="email" maxlength="254" required autocomplete="email"></label>
 <label>Codi del paper<select name="versio" required><option value="">Tria el codi</option></select></label>
 </div>
-<p>Separa les solucions amb comes o punt i coma, com ara <strong>−2, 3</strong>. Escriu els resultats fraccionaris com a <strong>fraccions simplificades</strong>, amb <strong>/</strong>. Si escrius un decimal, fes servir el punt.</p>
-<p class="muted">Toca una casella per seleccionar-la. També pots moure’t amb les fletxes o Intro.</p>
+<p>Separa les solucions amb comes o punt i coma, com ara <strong>−2, 3</strong>. Escriu els resultats fraccionaris com a <strong>fraccions simplificades</strong>, amb <strong>/</strong>. Si escrius un decimal amb el teclat físic, fes servir el punt.</p>
+<p class="muted">Toca una casella per seleccionar-la. Arrossega la capçalera del teclat per moure’l. També pots navegar amb les fletxes o Intro.</p>
 </section>
 <section class="zona-resultats">
-<div class="teclat" role="group" aria-label="Teclat de resultats">
-<p id="apartat-actiu">Apartat 1a</p>
+<div class="actions"><button type="button" class="secondary" id="obre-teclat" aria-controls="teclat" aria-expanded="false">Mostra el teclat</button></div>
+<div class="teclat" id="teclat" role="group" aria-label="Teclat de resultats" hidden>
+<div class="cap-teclat">
+<p id="ansa-teclat">⠿ <span id="apartat-actiu">Apartat 1a</span></p>
+<button type="button" class="secondary" id="amaga-teclat">Amaga</button>
+</div>
+<div class="cos-teclat">
 <div class="tecles" id="tecles-numeriques"></div>
-<div class="tecles">
-<button type="button" class="secondary" data-mou="-1" aria-label="Apartat anterior">←</button>
-<button type="button" class="secondary" data-mou="1" aria-label="Apartat següent">→</button>
+<div>
+<div class="cruceta" aria-label="Mou-te per la graella">
+<button type="button" class="secondary" data-mou="amunt" aria-label="Apartat de sobre">↑</button>
+<button type="button" class="secondary" data-mou="esquerra" aria-label="Apartat de l’esquerra">←</button>
+<button type="button" class="secondary" data-mou="dreta" aria-label="Apartat de la dreta">→</button>
+<button type="button" class="secondary" data-mou="avall" aria-label="Apartat de sota">↓</button>
+</div>
+<div class="respostes-especials">
 <button type="button" class="secondary" data-resposta="Identitat">Identitat</button>
 <button type="button" class="secondary" data-resposta="Sense solució">Cap solució</button>
 </div>
-</div>
+</div></div></div>
 <div class="graella-scroll"><table class="graella" aria-label="Resultats dels exercicis">
 <thead><tr><th scope="col">Ex.</th><th scope="col">a</th><th scope="col">b</th><th scope="col">c</th></tr></thead>
 <tbody id="grups"></tbody>
@@ -91,6 +124,50 @@ const comptador = document.querySelector('#comptador');
 const etiquetaActiva = document.querySelector('#apartat-actiu');
 const tecles = document.querySelector('.teclat');
 let activa = 0;
+const obreTeclat = document.querySelector('#obre-teclat');
+const ansa = document.querySelector('#ansa-teclat');
+let arrossegament;
+
+function situaTeclat(x,y) {
+  const limitX = Math.max(4,window.innerWidth-tecles.offsetWidth-4);
+  const limitY = Math.max(4,window.innerHeight-tecles.offsetHeight-4);
+  tecles.style.left = Math.min(limitX,Math.max(4,x))+'px';
+  tecles.style.top = Math.min(limitY,Math.max(4,y))+'px';
+  tecles.style.right = 'auto';
+  tecles.style.bottom = 'auto';
+}
+function mostraTeclat(mostra) {
+  tecles.hidden = !mostra;
+  obreTeclat.setAttribute('aria-expanded',String(mostra));
+  obreTeclat.textContent = mostra ? 'Amaga el teclat' : 'Mostra el teclat';
+  if (mostra) {
+    const posicio = tecles.getBoundingClientRect();
+    situaTeclat(posicio.left,posicio.top);
+  }
+}
+obreTeclat.onclick = () => mostraTeclat(tecles.hidden);
+document.querySelector('#amaga-teclat').onclick = () => {
+  mostraTeclat(false);
+  obreTeclat.focus();
+};
+ansa.addEventListener('pointerdown',e=>{
+  if (e.button!==0) return;
+  const posicio = tecles.getBoundingClientRect();
+  arrossegament = {id:e.pointerId,x:e.clientX-posicio.left,y:e.clientY-posicio.top};
+  ansa.setPointerCapture(e.pointerId);
+});
+ansa.addEventListener('pointermove',e=>{
+  if (arrossegament && e.pointerId===arrossegament.id) {
+    situaTeclat(e.clientX-arrossegament.x,e.clientY-arrossegament.y);
+  }
+});
+ansa.addEventListener('lostpointercapture',()=>{arrossegament=undefined;});
+window.addEventListener('resize',()=>{
+  if (!tecles.hidden) {
+    const posicio = tecles.getBoundingClientRect();
+    situaTeclat(posicio.left,posicio.top);
+  }
+});
 
 function actualitza() {
   const n = caselles.filter(casella => casella.value.trim()).length;
@@ -108,6 +185,7 @@ function enfoca(index) {
   caselles[index].focus();
 }
 selecciona(0);
+if (window.innerWidth>=1024) mostraTeclat(true);
 caselles.forEach((text,i) => {
   text.addEventListener('input',actualitza);
   text.addEventListener('focus',()=>selecciona(i));
@@ -132,9 +210,11 @@ caselles.forEach((text,i) => {
   });
 });
 
-const simbols = [['1'],['2'],['3'],['4'],['5'],['6'],['7'],['8'],['9'],['0'],
-  ['-','−','Signe negatiu'],['/','/','Barra de fracció'],['.','.','Punt decimal'],
-  [';', ';','Separa dues solucions'],['esborra','⌫','Esborra']];
+const simbols = [
+  ['-','−','Signe negatiu'],['/','/','Barra de fracció'],['esborra','⌫','Esborra'],
+  ['7'],['8'],['9'],['4'],['5'],['6'],['1'],['2'],['3'],
+  ['0'],[',',',','Coma per separar solucions'],[';',';','Punt i coma per separar solucions']
+];
 document.querySelector('#tecles-numeriques').innerHTML = simbols.map(([valor,text=valor,nom=text]) =>
   '<button type="button" data-tecla="'+valor+'" aria-label="'+nom+'">'+text+'</button>').join('');
 
@@ -145,7 +225,11 @@ tecles.addEventListener('click',e=>{
   const boto = e.target.closest('button');
   if (!boto) return;
   if (boto.dataset.mou) {
-    enfoca(activa+Number(boto.dataset.mou));
+    const direccio = boto.dataset.mou;
+    const columna = activa%3;
+    if ((direccio==='esquerra' && columna===0) || (direccio==='dreta' && columna===2)) return;
+    const pas = {amunt:-3,avall:3,esquerra:-1,dreta:1};
+    enfoca(activa+pas[direccio]);
     return;
   }
   const camp = caselles[activa];
