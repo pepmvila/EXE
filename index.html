@@ -15,12 +15,14 @@ button{border:1px solid #006052;border-radius:7px;padding:9px 15px;background:#0
 button.secondary{background:white;color:#006052}button:disabled{opacity:.55;cursor:default}
 .identitat{display:grid;gap:8px}
 .graella{width:100%;border-collapse:separate;border-spacing:0 4px;table-layout:fixed}
-.graella th,.graella td{padding:3px 4px}.graella th:first-child{width:64px}
-.graella td{background:#edf5f2;border-radius:8px}.graella input,.graella select{margin:0;padding:4px 5px}
-.graella select{font-size:.81rem}.graella input{margin-top:3px}
-.graella td:focus-within{outline:2px solid #168b76;outline-offset:-2px}
-.graella [hidden]{display:none}
-@media(max-width:500px){.graella th:first-child{width:30px}.graella th,.graella td{padding:2px}.graella select{font-size:.75rem}}
+.graella th,.graella td{border-radius:8px}.graella input{margin:0;padding:8px 5px}
+.graella input.activa{background:#d8f1e8;border-color:#006052}
+.teclat{background:#eff8f4;border:1px solid #bfd6cc;border-radius:10px;padding:8px;margin-bottom:10px}
+.graella-scroll{max-height:min(55vh,440px);overflow:auto;scroll-padding:6px}
+.teclat p{margin:0 0 5px;font-weight:700}.tecles{display:flex;flex-wrap:wrap;gap:5px}
+.tecles button{padding:4px 8px;min-height:34px;min-width:32px}
+.tecles + .tecles{margin-top:5px}
+@media(max-width:500px){.graella th:first-child{width:30px}.graella th,.graella td{padding:2px}.tecles button{padding:4px 6px}}
 .identitat{grid-template-columns:minmax(0,2fr) minmax(110px,1fr);margin-bottom:10px}
 .actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}.muted{color:#456760}.error{color:#8b2929}
 dialog{width:min(92vw,460px);margin:auto}dialog::backdrop{background:#142e28aa}
@@ -31,25 +33,36 @@ dialog{width:min(92vw,460px);margin:auto}dialog::backdrop{background:#142e28aa}
 <main>
 <h1>Prova d’equacions</h1>
 <p class="muted">4t d’ESO · Lliurament de respostes</p>
-<form id="prova" method="post" target="_blank">
+<form id="prova" method="post">
 <section>
 <div class="identitat">
 <label>Correu del centre<input name="correu" type="email" maxlength="254" required autocomplete="email"></label>
 <label>Codi del paper<select name="versio" required><option value="">Tria el codi</option></select></label>
 </div>
-<p>Separa les solucions amb comes o punt i coma, com ara <strong>−2, 3</strong>. Escriu les fraccions amb <strong>/</strong> i els decimals amb punt.</p>
-<p class="muted">A 1a, 2a i 3a, simplifica les fraccions. Usa les fletxes o Retorn per moure’t per la graella.</p>
+<p>Separa les solucions amb comes o punt i coma, com ara <strong>−2, 3</strong>. Escriu els resultats fraccionaris com a <strong>fraccions simplificades</strong>, amb <strong>/</strong>. Si escrius un decimal, fes servir el punt.</p>
+<p class="muted">Toca una casella per seleccionar-la. També pots moure’t amb les fletxes o Intro.</p>
 </section>
-<section><table class="graella" aria-label="Resultats dels exercicis">
+<section class="zona-resultats">
+<div class="teclat" role="group" aria-label="Teclat de resultats">
+<p id="apartat-actiu">Apartat 1a</p>
+<div class="tecles" id="tecles-numeriques"></div>
+<div class="tecles">
+<button type="button" class="secondary" data-mou="-1" aria-label="Apartat anterior">←</button>
+<button type="button" class="secondary" data-mou="1" aria-label="Apartat següent">→</button>
+<button type="button" class="secondary" data-resposta="Identitat">Identitat</button>
+<button type="button" class="secondary" data-resposta="Sense solució">Cap solució</button>
+</div>
+</div>
+<div class="graella-scroll"><table class="graella" aria-label="Resultats dels exercicis">
 <thead><tr><th scope="col">Ex.</th><th scope="col">a</th><th scope="col">b</th><th scope="col">c</th></tr></thead>
 <tbody id="grups"></tbody>
-</table></section>
+</table></div></section>
 <div class="actions"><button id="revisa">Revisa el lliurament</button><span id="comptador">0 de 21 apartats omplerts</span><span id="avis" role="status"></span></div>
 </form>
 <dialog id="confirmacio">
 <h2>Confirma el lliurament</h2>
 <p id="resum"></p>
-<p class="muted">La confirmació i la nota s’obriran en una pestanya nova.</p>
+<p class="muted">La confirmació i la nota apareixeran en aquesta mateixa pestanya.</p>
 <div class="actions">
 <button type="submit" form="prova" id="enviar">Envia les respostes</button>
 <button type="button" class="secondary" id="cancel">Torna a les respostes</button>
@@ -68,50 +81,45 @@ files.innerHTML = Array.from({length:7}, (_, fila) => {
   const numero = fila + 1;
   return '<tr><th scope="row">'+numero+'</th>'+['a','b','c'].map(l => {
     const apartat = numero+l;
-    return '<td tabindex="-1"><select aria-label="Tipus de resposta '+apartat+'">'+
-      '<option value="">Escriure</option><option>Sense solució</option><option>Identitat</option></select>'+
-      '<input class="resultat" aria-label="Resultat '+apartat+'" type="text" maxlength="140" autocomplete="off" spellcheck="false">'+
-      '<input type="hidden" name="r'+apartat+'"></td>';
+    return '<td><input class="resultat" name="r'+apartat+'" aria-label="Resultat '+apartat+
+      '" type="text" inputmode="none" maxlength="140" autocomplete="off" spellcheck="false"></td>';
   }).join('')+'</tr>';
 }).join('');
 
-const caselles = [...files.querySelectorAll('td')];
+const caselles = [...files.querySelectorAll('.resultat')];
 const comptador = document.querySelector('#comptador');
-function actualitza(casella) {
-  const mode = casella.querySelector('select');
-  const text = casella.querySelector('.resultat');
-  text.hidden = Boolean(mode.value);
-  casella.querySelector('input[type="hidden"]').value = mode.value || text.value.trim();
-  const n = caselles.filter(c => c.querySelector('input[type="hidden"]').value).length;
+const etiquetaActiva = document.querySelector('#apartat-actiu');
+const tecles = document.querySelector('.teclat');
+let activa = 0;
+
+function actualitza() {
+  const n = caselles.filter(casella => casella.value.trim()).length;
   comptador.textContent = n+' de 21 apartats omplerts';
 }
-function enfoca(index) {
+function selecciona(index) {
+  caselles[activa].classList.remove('activa');
+  activa = index;
   const casella = caselles[index];
-  if (!casella) return;
-  const text = casella.querySelector('.resultat');
-  (text.hidden ? casella : text).focus();
+  casella.classList.add('activa');
+  etiquetaActiva.textContent = 'Apartat '+casella.name.slice(1);
 }
-caselles.forEach((casella,i) => {
-  const mode = casella.querySelector('select');
-  const text = casella.querySelector('.resultat');
-  text.addEventListener('input',()=>actualitza(casella));
-  mode.addEventListener('change',()=>{
-    actualitza(casella);
-    enfoca(i);
-  });
-  casella.addEventListener('keydown',e=>{
+function enfoca(index) {
+  if (!caselles[index]) return;
+  caselles[index].focus();
+}
+selecciona(0);
+caselles.forEach((text,i) => {
+  text.addEventListener('input',actualitza);
+  text.addEventListener('focus',()=>selecciona(i));
+  text.addEventListener('keydown',e=>{
     if (e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.target===mode) return; // Les fletxes del desplegable trien una opció.
-    const editant = e.target===text;
-    const seleccio = editant && text.selectionStart!==text.selectionEnd;
+    const seleccio = text.selectionStart!==text.selectionEnd;
     let desti = i;
     if (e.key==='ArrowUp') desti = i-3;
     else if (e.key==='ArrowDown') desti = i+3;
-    else if (e.key==='ArrowLeft' && (!editant || (!seleccio && text.selectionStart===0))) {
-      if (i%3!==0) desti=i-1;
-    } else if (e.key==='ArrowRight' && (!editant || (!seleccio && text.selectionEnd===text.value.length))) {
-      if (i%3!==2) desti=i+1;
-    } else if (e.key==='Enter') {
+    else if (e.key==='ArrowLeft' && !seleccio && text.selectionStart===0 && i%3!==0) desti=i-1;
+    else if (e.key==='ArrowRight' && !seleccio && text.selectionEnd===text.value.length && i%3!==2) desti=i+1;
+    else if (e.key==='Enter') {
       e.preventDefault();
       if (i===caselles.length-1 && !e.shiftKey) document.querySelector('#revisa').focus();
       else enfoca(i+(e.shiftKey?-1:1));
@@ -123,6 +131,40 @@ caselles.forEach((casella,i) => {
     }
   });
 });
+
+const simbols = [['1'],['2'],['3'],['4'],['5'],['6'],['7'],['8'],['9'],['0'],
+  ['-','−','Signe negatiu'],['/','/','Barra de fracció'],['.','.','Punt decimal'],
+  [';', ';','Separa dues solucions'],['esborra','⌫','Esborra']];
+document.querySelector('#tecles-numeriques').innerHTML = simbols.map(([valor,text=valor,nom=text]) =>
+  '<button type="button" data-tecla="'+valor+'" aria-label="'+nom+'">'+text+'</button>').join('');
+
+tecles.addEventListener('mousedown',e=>{
+  if (e.target.closest('button')) e.preventDefault();
+});
+tecles.addEventListener('click',e=>{
+  const boto = e.target.closest('button');
+  if (!boto) return;
+  if (boto.dataset.mou) {
+    enfoca(activa+Number(boto.dataset.mou));
+    return;
+  }
+  const camp = caselles[activa];
+  if (boto.dataset.resposta) {
+    camp.value = boto.dataset.resposta;
+  } else {
+    const tecla = boto.dataset.tecla;
+    if (camp.value==='Identitat' || camp.value==='Sense solució') camp.value='';
+    const inici = camp.selectionStart;
+    const fi = camp.selectionEnd;
+    if (tecla==='esborra') {
+      camp.setRangeText('', inici===fi ? Math.max(0,inici-1) : inici, fi, 'end');
+    } else if (camp.value.length-(fi-inici)<camp.maxLength) {
+      camp.setRangeText(tecla,inici,fi,'end');
+    }
+  }
+  camp.focus({preventScroll:true});
+  actualitza();
+});
 document.querySelector('#cancel').onclick = () => dialog.close();
 if (/^https:\/\/script\.google\.com\/(?:macros|a\/macros\/[^/]+)\/s\/[^/]+\/exec$/.test(ADRECA_APPS_SCRIPT)) {
   form.action = ADRECA_APPS_SCRIPT;
@@ -131,12 +173,11 @@ if (/^https:\/\/script\.google\.com\/(?:macros|a\/macros\/[^/]+)\/s\/[^/]+\/exec
   avis.textContent = 'El docent encara ha de connectar el formulari.';
 }
 form.addEventListener('submit',e => {
-  caselles.forEach(actualitza);
   if (!form.hasAttribute('action')) {e.preventDefault();return;}
   if (e.submitter && e.submitter.id==='enviar' && dialog.open) {
     dialog.close();
     avis.className = '';
-    avis.textContent = 'Consulta la pestanya nova per confirmar que s’ha registrat el lliurament.';
+    avis.textContent = 'Enviant les respostes…';
     return;
   }
   e.preventDefault();
